@@ -1,0 +1,62 @@
+{
+    "name": "ranger-demo-grpc-nodejs",
+    "version": "1.0.0",
+    "description": "ranger-demo-grpc-nodejs",
+    "config": {
+        "image": "asia-east1-docker.pkg.dev/aiii-developer/develop/ranger-demo-grpc-nodejs"
+    },
+    "scripts": {
+        "start": "node lib/server.js",
+        "lint": "tslint --project tsconfig.json",
+        "protoc-gen": "./node_modules/.bin/grpc_tools_node_protoc --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto  --ts_proto_out=./src/protos --ts_proto_opt=outputServices=nice-grpc,outputServices=generic-definitions,useExactTypes=false --proto_path=./src/protos ./src/protos/action.proto",
+        "protoc-reflection":"protoc --descriptor_set_out=./src/protos/descriptor_set.bin --include_imports  ./src/protos/action.proto",
+        "build": "tsc && copyfiles -u 1 src/protos/** lib/src/",
+        "start:server": "node lib/server.js",
+        "start:client": "node lib/client.js",
+        "docker:build": "docker build -t $npm_package_config_image:$npm_package_version --platform linux/amd64 . --no-cache",
+        "docker:push": "docker push $npm_package_config_image:$npm_package_version",
+        "docker:deploy": "gcloud run deploy $npm_package_name --image $npm_package_config_image:$npm_package_version --region asia-east1 --platform managed --allow-unauthenticated --use-http2",
+        "deploy": "docker build -t $npm_package_config_image:$npm_package_version --platform linux/amd64 . && docker push $npm_package_config_image:$npm_package_version && gcloud run deploy $npm_package_name --image $npm_package_config_image:$npm_package_version --region asia-east1 --platform managed --allow-unauthenticated --use-http2",
+        "docker:run-proxy": "cd proxy && docker run --name grpc-envoy-workshop -d -v \"$(pwd)\"/envoy-cloud-run.yaml:/etc/envoy/envoy.yaml:ro -p 8080:8080 -p 9901:9901 envoyproxy/envoy:v1.22.0"
+    },
+    "author": "",
+    "license": "Apache-2.0",
+    "main": "lib/index.js",
+    "dependencies": {
+        "@grpc/grpc-js": "^1.7.1",
+        "@grpc/proto-loader": "^0.7.3",
+        "nice-grpc-common": "^2.0.0",
+        "nice-grpc": "^2.0.0",
+        "body-parser": "^1.19.0",
+        "connect-timeout": "1.9.0",
+        "cors": "^2.8.5",
+        "express": "^4.18.1",
+        "lodash": "^4.17.20",
+        "long": "^5.2.0",
+        "mime-types": "2.1.34",
+        "moment": "2.24.0",
+        "moment-timezone": "0.5.27",
+        "prompts": "2.4.2",
+        "protobufjs": "^7.1.2",
+        "request": "2.88.2",
+        "request-promise": "4.2.5",
+        "rxjs": "~6.6.0",
+        "ix": "5.0.0",
+        "uuid": "3.3.3"
+    },
+    "devDependencies": {
+        "@types/connect-timeout": "0.0.34",
+        "@types/cors": "^2.8.10",
+        "@types/lodash": "^4.14.168",
+        "@types/mime-types": "^2.1.1",
+        "@types/minimist": "1.2.2",
+        "@types/moment-timezone": "0.5.12",
+        "@types/node": "^13.13.42",
+        "@types/request-promise": "4.1.45",
+        "@types/uuid": "3.4.6",
+        "copyfiles": "2.4.1",
+        "grpc-tools": "^1.11.2",
+        "ts-proto": "^1.126.1",
+        "typescript": "^4.8.0"
+    }
+}
